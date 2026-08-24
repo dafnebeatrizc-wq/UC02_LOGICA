@@ -1,0 +1,7 @@
+RESUMO DA AULA ANTERIOR (21/08)
+
+A aula alertar inicialmente a importância da segurança e da ergonomia no laboratório de informática, destacando postura, organização do espaço, pausas e cuidados durante o uso dos equipamentos.
+
+Em seguida, são apresentados conceitos básicos de lógica de programação, como variáveis, constantes e tipos de dados. As variáveis podem ter seus valores alterados, enquanto as constantes permanecem fixas. Os tipos de dados indicam se uma informação é numérica, textual ou lógica.
+
+Também são estudados os operadores aritméticos, usados para realizar cálculos, e os operadores relacionais, responsáveis por comparar valores e gerar resultados verdadeiros ou falsos. Por fim, a aula mostra a aplicação desses conceitos em sistemas do dia a dia e destaca que a organização e a escolha correta dos dados ajudam a evitar erros e tornam o código mais fácil de compreender.
