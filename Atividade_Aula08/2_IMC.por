@@ -29,7 +29,7 @@ programa
 
 			senao se (imc >= 18.5 e imc <= 24.9)
 			{
-				escreva("Peso normal (Adequado)" )
+				escreva("Peso normal (Adequado). " )
 			}
 
 			senao se (imc >= 25.0 e imc <= 29.9)
