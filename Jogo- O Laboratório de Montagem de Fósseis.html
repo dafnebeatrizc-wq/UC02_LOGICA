@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>O Laboratório de Montagem de Fósseis</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Nunito:wght@400;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            babyBlue: {
+              50: '#F0F7FF',
+              100: '#E0F0FE',
+              200: '#BAE0FD',
+              300: '#7CC2FA',
+              400: '#38A3F6',
+              500: '#0E85E5',
+              600: '#0267BD',
+            },
+            pastelBlue: '#A0C4FF',
+            pastelBg: '#EBF4FF',
+            pastelCard: '#F4F9FF',
+            mintGreen: '#C7F9CC',
+            softYellow: '#FFEC99',
+            softPink: '#FFC6FF',
+            codeBg: '#1E293B',
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+            code: ['Fira Code', 'monospace'],
+            notebook: ['Patrick Hand', 'cursive'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #EBF4FF;
+      font-family: 'Nunito', sans-serif;
+      color: #1E293B;
+      user-select: none;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(160, 196, 255, 0.5);
+    }
+
+    .notebook-paper {
+      background-color: #FAF8F5;
+      background-image: linear-gradient(#E8E5DF 1px, transparent 1px);
+      background-size: 100% 1.8rem;
+      line-height: 1.8rem;
+      font-family: 'Patrick Hand', cursive;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #E0F0FE;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #A0C4FF;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7CC2FA;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(124, 194, 250, 0.4); }
+      50% { box-shadow: 0 0 25px rgba(124, 194, 250, 0.8); }
+    }
+    .glow-active {
+      animation: pulseGlow 2s infinite;
+    }
+
+    @keyframes miniBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .hover-bounce:hover {
+      animation: miniBounce 0.5s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 sm:p-4">
+
+  <header class="max-w-7xl mx-auto w-full glass-panel rounded-2xl p-3 sm:p-4 mb-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 border-2 border-babyBlue-200">
+    <div class="flex items-center gap-3">
+      <div class="bg-babyBlue-300 text-white p-3 rounded-xl shadow-inner flex items-center justify-center">
+        <i class="fa-solid fa-feather-pointed text-2xl animate-pulse"></i>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold text-babyBlue-600 flex items-center gap-2">
+          Laboratório de Fósseis & Aves <span class="text-xs bg-babyBlue-100 text-babyBlue-600 px-2.5 py-0.5 rounded-full border border-babyBlue-300 font-mono">v2.5 Brasil</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 font-medium">Classifique dinossauros terrestres e aves pré-históricas usando lógica de programação!</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 sm:gap-4 bg-babyBlue-50/80 p-2 px-4 rounded-xl border border-babyBlue-200">
+      <div class="text-center px-2">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Fósseis</span>
+        <span id="score-text" class="text-lg font-black text-babyBlue-600">0 / 6</span>
+      </div>
+      <div class="h-8 w-px bg-babyBlue-200"></div>
+      <div class="text-center px-2">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Nível</span>
+        <span id="level-badge" class="text-xs font-extrabold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md border border-emerald-200 block mt-0.5">Estagiário</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow">
+
+    <!-- LEFT COLUMN: CANVAS & CONTROLS -->
+    <section class="lg:col-span-7 flex flex-col gap-4">
+      
+      <!-- 2D CANVAS CONTAINER -->
+      <div class="glass-panel rounded-2xl p-3 shadow-sm border-2 border-babyBlue-200 flex flex-col relative overflow-hidden bg-white">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-babyBlue-100">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            MESA DE RAIO-X & RECONSTRUÇÃO 2D
+          </div>
+          <div id="fossil-tag" class="text-xs font-mono font-bold text-babyBlue-600 bg-babyBlue-100 px-2.5 py-1 rounded-lg">
+            Amostra: #001
+          </div>
+        </div>
+
+        <!-- The 2D Canvas -->
+        <div class="relative w-full aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden shadow-inner flex items-center justify-center">
+          <canvas id="labCanvas" class="w-full h-full block"></canvas>
+          
+          <div id="scanner-line" class="hidden absolute top-0 left-0 w-full h-2 bg-cyan-400 shadow-[0_0_15px_#06b6d4] opacity-80 transition-all duration-300 pointer-events-none"></div>
+
+          <div id="canvas-toast" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-lg transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-20 flex items-center gap-2">
+            <i id="toast-icon" class="fa-solid fa-circle-info"></i>
+            <span id="toast-msg">Mensagem do Laboratório</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mt-3">
+          <button id="btn-analyze" class="hover-bounce flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-amber-100 text-amber-800 hover:bg-amber-200 border-2 border-amber-300 transition-all shadow-sm">
+            <i class="fa-solid fa-magnifying-glass text-amber-600 text-base"></i>
+            <span>1. Analisar Fóssil</span>
+          </button>
+
+          <button id="btn-execute" class="hover-bounce flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-babyBlue-500 text-white hover:bg-babyBlue-600 border-2 border-babyBlue-600 transition-all shadow-md glow-active">
+            <i class="fa-solid fa-play text-white text-base"></i>
+            <span>2. montar_esqueleto()</span>
+          </button>
+
+          <button id="btn-next" class="hover-bounce flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm bg-slate-100 text-slate-700 hover:bg-slate-200 border-2 border-slate-300 transition-all shadow-sm">
+            <span>Próximo</span>
+            <i class="fa-solid fa-arrow-right text-slate-500"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-panel rounded-2xl p-4 shadow-sm border-2 border-babyBlue-200 bg-white">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-extrabold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-code text-babyBlue-500"></i> Painel de Programação (Variáveis do Fóssil)
+          </h2>
+          <span class="text-[11px] text-slate-400 font-mono">Ajuste as variáveis para a função</span>
+        </div>
+
+        <div class="bg-codeBg rounded-xl p-3 sm:p-4 text-white font-mono text-xs sm:text-sm shadow-md mb-3 border border-slate-700">
+          <div class="text-slate-400 mb-1">// 1. Atribuição das Variáveis extraídas</div>
+          
+          <div class="flex flex-wrap items-center gap-2 my-1.5">
+            <span class="text-purple-400 font-semibold">let</span>
+            <span class="text-blue-300">dentes</span>
+            <span class="text-slate-400">=</span>
+            <select id="var-dentes" class="bg-slate-800 text-emerald-300 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:border-babyBlue-400 font-semibold cursor-pointer">
+              <option value="???">"???"</option>
+              <option value="afiados">"afiados"</option>
+              <option value="planos">"planos"</option>
+              <option value="sem dentes (bico)">"sem dentes (bico)"</option>
+            </select>;
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 my-1.5">
+            <span class="text-purple-400 font-semibold">let</span>
+            <span class="text-blue-300">postura</span>
+            <span class="text-slate-400">=</span>
+            <select id="var-postura" class="bg-slate-800 text-emerald-300 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:border-babyBlue-400 font-semibold cursor-pointer">
+              <option value="???">"???"</option>
+              <option value="bipede">"bipede"</option>
+              <option value="quadrupede">"quadrupede"</option>
+              <option value="bipede (com asas)">"bipede (com asas)"</option>
+            </select>;
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 my-1.5">
+            <span class="text-purple-400 font-semibold">let</span>
+            <span class="text-blue-300">tamanho</span>
+            <span class="text-slate-400">=</span>
+            <select id="var-tamanho" class="bg-slate-800 text-emerald-300 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:border-babyBlue-400 font-semibold cursor-pointer">
+              <option value="???">"???"</option>
+              <option value="pequeno">"pequeno"</option>
+              <option value="medio">"medio"</option>
+              <option value="gigante">"gigante"</option>
+            </select>;
+          </div>
+
+          <div class="text-slate-400 mt-3 mb-1">// 2. Chamada da Função de Montagem</div>
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-yellow-300 font-semibold">montar_esqueleto</span>(
+            <select id="var-especie" class="bg-slate-800 text-yellow-200 border border-amber-500/50 rounded px-2 py-1 focus:outline-none focus:border-amber-400 font-semibold cursor-pointer">
+              <option value="???">"???"</option>
+              <option value="Santanaraptor">"Santanaraptor 🇧🇷"</option>
+              <option value="Archaeopteryx (Ave Primitiva)">"Archaeopteryx (Ave Primitiva)"</option>
+              <option value="Kelenken (Ave do Terror)">"Kelenken (Ave do Terror) 🇧🇷"</option>
+              <option value="Tyrannosaurus Rex">"Tyrannosaurus Rex"</option>
+              <option value="Triceratops">"Triceratops"</option>
+              <option value="Brachiosaurus">"Brachiosaurus"</option>
+            </select>
+            );
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lg:col-span-5 flex flex-col gap-4">
+
+      <!-- PALAEONTOLOGIST NOTEBOOK -->
+      <div class="glass-panel rounded-2xl p-4 shadow-md border-2 border-babyBlue-200 bg-white flex flex-col flex-grow relative overflow-hidden">
+        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-200/90 px-6 py-1 rounded-md text-[10px] font-bold text-amber-900 border border-amber-300 shadow-sm uppercase tracking-widest">
+          Caderno de Campo do Paleontólogo
+        </div>
+
+        <div class="flex items-center justify-between border-b-2 border-babyBlue-200 pb-2 mb-3 mt-1">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-book-open text-babyBlue-500 text-lg"></i>
+            <h2 class="text-base font-extrabold text-slate-700">Anotações da Escavação</h2>
+          </div>
+          <span id="analysis-status-pill" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-300">
+            Aguardando Lupa
+          </span>
+        </div>
+
+        <!-- Location Alert Banner -->
+        <div id="location-banner" class="hidden mb-3 p-2.5 bg-emerald-100 border-2 border-emerald-300 rounded-xl text-emerald-900 text-xs font-extrabold flex items-center gap-2 animate-bounce">
+          <i class="fa-solid fa-location-dot text-emerald-600 text-base"></i>
+          <span id="location-text">Fóssil localizado!</span>
+        </div>
+
+        <!-- Notebook Content -->
+        <div class="notebook-paper p-4 rounded-xl border border-amber-200/60 text-slate-800 text-lg flex-grow min-h-[220px] shadow-inner relative">
+          <div id="notebook-content" class="space-y-1">
+            <p class="text-slate-400 italic">
+              👈 Clique no botão <span class="font-bold text-amber-700 font-sans text-xs bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">1. Analisar Fóssil</span> para escanear a amostra e descobrir de qual país ele veio e quais são suas variáveis!
+            </p>
+          </div>
+        </div>
+
+        <!-- Curiosities Footnote -->
+        <div class="mt-3 bg-babyBlue-50 p-2.5 rounded-xl border border-babyBlue-200 flex items-start gap-2.5 text-xs text-babyBlue-700">
+          <i class="fa-solid fa-feather text-babyBlue-500 text-sm mt-0.5 shrink-0"></i>
+          <p><strong>Sabia?</strong> Aves modernas são taxonomicamente dinossauros avianos! Elas mantêm ossos ocos e membros bípedes herdados dos terópodes.</p>
+        </div>
+      </div>
+
+      <!-- SPECIES REFERENCE GUIDE -->
+      <div class="glass-panel rounded-2xl p-4 shadow-sm border-2 border-babyBlue-200 bg-white">
+        <button id="toggle-db-btn" class="w-full flex items-center justify-between text-left font-extrabold text-xs sm:text-sm text-slate-700 hover:text-babyBlue-600 transition-colors">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-globe text-babyBlue-500"></i> Banco de Dados Global (Espécies & Origens)
+          </span>
+          <i id="db-chevron" class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+        </button>
+
+        <div id="db-content" class="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 mt-4 py-2 border-t border-babyBlue-200 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <span>🧪 <strong>O Laboratório de Montagem de Fósseis & Aves</strong> — Fósseis do Brasil e do Mundo</span>
+    <span class="bg-babyBlue-100 text-babyBlue-600 px-2 py-0.5 rounded-full text-[10px] font-extrabold">Pastel Baby-Blue Edition</span>
+  </footer>
+
+  <script>
+    /* ========================================================================
+       GAME DATABASE (Dinosaurs & Birds with Discovery Locations & Detailed Rendering)
+       ======================================================================== */
+    const DINO_DATABASE = [
+      {
+        id: "santanaraptor",
+        especie: "Santanaraptor",
+        pais: "Brasil 🇧🇷 (Bacia do Araripe, Ceará)",
+        mensagemDescoberta: "Este fóssil foi encontrado no BRASIL (Ceará)! Nos ajude a desvendá-lo!",
+        dentes: "afiados",
+        postura: "bipede",
+        tamanho: "pequeno",
+        isAve: false,
+        cor: "#10B981",
+        notasAnalise: [
+          "📍 Local de Escavação: Bacia do Araripe, Ceará - BRASIL 🇧🇷.",
+          "Fóssil incrível com preservação de tecidos moles e garras.",
+          "Dentes afiados de predador agil e pequeno.",
+          "Postura BÍPEDE caracteristica de terópodes brasileiros.",
+          "Tamanho estimado: ~1.25 metros de comprimento (PEQUENO)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 3.5;
+          ctx.lineCap = "round";
+
+          // Skull
+          ctx.beginPath();
+          ctx.ellipse(x + 35, y - 40, 18, 10, -0.2, 0, Math.PI * 2);
+          ctx.stroke();
+          // Eye socket
+          ctx.fillStyle = boneColor;
+          ctx.beginPath(); ctx.arc(x + 30, y - 42, 3, 0, Math.PI * 2); ctx.fill();
+          // Teeth
+          for (let i = 0; i < 4; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x + 35 + i * 4, y - 32); ctx.lineTo(x + 37 + i * 4, y - 27);
+            ctx.stroke();
+          }
+
+          // Spine & Ribs
+          ctx.beginPath();
+          ctx.moveTo(x - 55, y - 10);
+          ctx.quadraticCurveTo(x - 10, y - 30, x + 30, y - 35);
+          ctx.stroke();
+          for (let i = -20; i <= 10; i += 8) {
+            ctx.beginPath(); ctx.moveTo(x + i, y - 28); ctx.lineTo(x + i + 2, y - 12); ctx.stroke();
+          }
+
+          // Legs & Feet
+          ctx.beginPath();
+          ctx.moveTo(x, y - 18); ctx.lineTo(x + 10, y + 25); ctx.lineTo(x + 22, y + 35);
+          ctx.moveTo(x - 15, y - 18); ctx.lineTo(x - 5, y + 25); ctx.lineTo(x + 8, y + 35);
+          ctx.stroke();
+
+          // Small Arms
+          ctx.beginPath();
+          ctx.moveTo(x + 20, y - 22); ctx.lineTo(x + 28, y - 10);
+          ctx.stroke();
+        }
+      },
+      {
+        id: "archaeopteryx",
+        especie: "Archaeopteryx (Ave Primitiva)",
+        pais: "Alemanha 🇩🇪 (Solnhofen)",
+        mensagemDescoberta: "Este fóssil da PRIMEIRA AVE/DINOSSAURO AVIANO foi encontrado na Alemanha! Nos ajude a desvendá-lo!",
+        dentes: "afiados",
+        postura: "bipede (com asas)",
+        tamanho: "pequeno",
+        isAve: true,
+        cor: "#F59E0B",
+        notasAnalise: [
+          "📍 Local de Escavação: Solnhofen, Alemanha 🇩🇪.",
+          "Fóssil de transição histórica entre dinossauros e aves!",
+          "Ainda possui DENTES AFIADOS no bico (traço dinossauriano).",
+          "Membros anteriores transformados em ASAS BÍPEDES com penas.",
+          "Tamanho pequeno similar a um pombo pré-histórico (PEQUENO)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 3;
+          ctx.lineCap = "round";
+
+          // Small head with tiny sharp teeth
+          ctx.beginPath();
+          ctx.ellipse(x + 30, y - 45, 12, 8, -0.3, 0, Math.PI * 2);
+          ctx.stroke();
+          // Beak teeth
+          ctx.beginPath(); ctx.moveTo(x + 35, y - 42); ctx.lineTo(x + 38, y - 38); ctx.stroke();
+
+          // Curved spine & long bony tail
+          ctx.beginPath();
+          ctx.moveTo(x - 65, y - 5);
+          ctx.quadraticCurveTo(x - 20, y - 25, x + 25, y - 38);
+          ctx.stroke();
+
+          // Wings (Asas) with feather outlines
+          ctx.beginPath();
+          ctx.moveTo(x + 10, y - 30);
+          ctx.lineTo(x + 45, y - 65);
+          ctx.lineTo(x + 20, y - 45);
+          ctx.stroke();
+
+          // Feather details on wing
+          ctx.lineWidth = 1.5;
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
+            ctx.moveTo(x + 20 + i * 5, y - 50 - i * 3);
+            ctx.lineTo(x + 10 + i * 5, y - 30 - i * 2);
+            ctx.stroke();
+          }
+          ctx.lineWidth = 3;
+
+          // Legs
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y - 15); ctx.lineTo(x, y + 25); ctx.lineTo(x + 12, y + 30);
+          ctx.moveTo(x - 18, y - 15); ctx.lineTo(x - 10, y + 25); ctx.lineTo(x + 2, y + 30);
+          ctx.stroke();
+        }
+      },
+      {
+        id: "kelenken",
+        especie: "Kelenken (Ave do Terror)",
+        pais: "América do Sul 🇧🇷/🇦🇷 (Brasil e Argentina)",
+        mensagemDescoberta: "Este fóssil da gigante AVE DO TERROR foi encontrado na América do Sul! Nos ajude a desvendá-lo!",
+        dentes: "sem dentes (bico)",
+        postura: "bipede",
+        tamanho: "medio",
+        isAve: true,
+        cor: "#EC4899",
+        notasAnalise: [
+          "📍 Local de Escavação: América do Sul (Brasil/Argentina) 🇧🇷.",
+          "Maior ave predadora pré-histórica já registrada!",
+          "SEM DENTES: Possui um BICO curvado gigante e poderoso.",
+          "Postura BÍPEDE de corrida com pernas ultra-longas.",
+          "Tamanho total: ~3 metros de altura (MÉDIO)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 3.5;
+          ctx.lineCap = "round";
+
+          // Giant Head & Curved Beak
+          ctx.beginPath();
+          ctx.arc(x + 25, y - 55, 16, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Hooked Beak (Bico curvo)
+          ctx.beginPath();
+          ctx.moveTo(x + 35, y - 60);
+          ctx.quadraticCurveTo(x + 60, y - 50, x + 50, y - 30);
+          ctx.lineTo(x + 32, y - 45);
+          ctx.stroke();
+
+          // Long Neck & Spine
+          ctx.beginPath();
+          ctx.moveTo(x - 45, y - 10);
+          ctx.quadraticCurveTo(x - 10, y - 25, x + 20, y - 40);
+          ctx.stroke();
+
+          // Vestigial Wings
+          ctx.beginPath();
+          ctx.moveTo(x + 5, y - 28); ctx.lineTo(x + 18, y - 18); ctx.stroke();
+
+          // Extremely long legs
+          ctx.beginPath();
+          ctx.moveTo(x - 5, y - 15); ctx.lineTo(x, y + 40); ctx.lineTo(x + 15, y + 45);
+          ctx.moveTo(x - 20, y - 15); ctx.lineTo(x - 12, y + 40); ctx.lineTo(x + 2, y + 45);
+          ctx.stroke();
+        }
+      },
+      {
+        id: "trex",
+        especie: "Tyrannosaurus Rex",
+        pais: "Estados Unidos 🇺🇸 / Canadá 🇨🇦",
+        mensagemDescoberta: "Este fóssil foi encontrado na América do Norte! Nos ajude a desvendá-lo!",
+        dentes: "afiados",
+        postura: "bipede",
+        tamanho: "gigante",
+        isAve: false,
+        cor: "#EF4444",
+        notasAnalise: [
+          "📍 Local de Escavação: Formação Hell Creek, EUA 🇺🇸.",
+          "Crânio maciço com mandíbulas de mordida devastadora.",
+          "Dentes serrilhados e ultra-AFIADOS.",
+          "Postura BÍPEDE com pernas musculosas.",
+          "Comprimento: ~12 metros (GIGANTE)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+
+          // Large Jaw & Skull
+          ctx.strokeRect(x + 35, y - 55, 45, 30);
+          for (let i = 0; i < 5; i++) {
+            ctx.beginPath(); ctx.moveTo(x + 40 + i * 8, y - 25); ctx.lineTo(x + 44 + i * 8, y - 18); ctx.stroke();
+          }
+
+          // Spine & Ribcage
+          ctx.beginPath();
+          ctx.moveTo(x - 70, y - 10);
+          ctx.quadraticCurveTo(x - 20, y - 45, x + 35, y - 35);
+          ctx.stroke();
+          for (let i = -30; i <= 15; i += 10) {
+            ctx.beginPath(); ctx.moveTo(x + i, y - 35); ctx.lineTo(x + i + 3, y - 12); ctx.stroke();
+          }
+
+          // Bipedal Legs
+          ctx.beginPath();
+          ctx.moveTo(x, y - 20); ctx.lineTo(x + 12, y + 35); ctx.lineTo(x + 28, y + 45);
+          ctx.moveTo(x - 25, y - 20); ctx.lineTo(x - 12, y + 35); ctx.lineTo(x + 4, y + 45);
+          ctx.stroke();
+
+          // Tiny 2-fingered Arms
+          ctx.beginPath(); ctx.moveTo(x + 25, y - 25); ctx.lineTo(x + 38, y - 12); ctx.stroke();
+        }
+      },
+      {
+        id: "triceratops",
+        especie: "Triceratops",
+        pais: "Estados Unidos 🇺🇸",
+        mensagemDescoberta: "Este fóssil foi encontrado nos EUA! Nos ajude a desvendá-lo!",
+        dentes: "planos",
+        postura: "quadrupede",
+        tamanho: "medio",
+        isAve: false,
+        cor: "#8B5CF6",
+        notasAnalise: [
+          "📍 Local de Escavação: Wyoming, EUA 🇺🇸.",
+          "Escudo ósseo protetor na nuca.",
+          "Dentes PLANOS organizados em baterias para triturar fibras.",
+          "Estrutura QUADRÚPEDE sustentada por 4 patas fortes.",
+          "Tamanho aproximado: ~9 metros (MÉDIO)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 4;
+          ctx.lineCap = "round";
+
+          // Frill & Horns
+          ctx.beginPath();
+          ctx.arc(x + 35, y - 35, 28, Math.PI * 0.8, Math.PI * 1.8);
+          ctx.stroke();
+          ctx.strokeRect(x + 35, y - 35, 30, 20);
+
+          // Brow Horns
+          ctx.beginPath();
+          ctx.moveTo(x + 50, y - 40); ctx.lineTo(x + 72, y - 58);
+          ctx.moveTo(x + 60, y - 30); ctx.lineTo(x + 78, y - 42);
+          ctx.stroke();
+
+          // Spine
+          ctx.beginPath();
+          ctx.moveTo(x - 65, y - 10);
+          ctx.quadraticCurveTo(x - 10, y - 30, x + 35, y - 20);
+          ctx.stroke();
+
+          // 4 Quadruped Legs
+          ctx.beginPath();
+          ctx.moveTo(x - 50, y - 10); ctx.lineTo(x - 50, y + 38);
+          ctx.moveTo(x - 30, y - 12); ctx.lineTo(x - 30, y + 38);
+          ctx.moveTo(x + 10, y - 12); ctx.lineTo(x + 10, y + 38);
+          ctx.moveTo(x + 28, y - 12); ctx.lineTo(x + 28, y + 38);
+          ctx.stroke();
+        }
+      },
+      {
+        id: "brachiosaurus",
+        especie: "Brachiosaurus",
+        pais: "Tanzânia 🇹🇿 / Estados Unidos 🇺🇸",
+        mensagemDescoberta: "Este fóssil colossal foi encontrado na África e América do Norte! Nos ajude a desvendá-lo!",
+        dentes: "planos",
+        postura: "quadrupede",
+        tamanho: "gigante",
+        isAve: false,
+        cor: "#3B82F6",
+        notasAnalise: [
+          "📍 Local de Escavação: Tendaguru, Tanzânia 🇹🇿 e Colorado, EUA 🇺🇸.",
+          "Pescoço ultra-elevado para alcance de árvores altas.",
+          "Dentes PLANOS em forma de colher.",
+          "Postura QUADRÚPEDE com ombros mais altos que o quadril.",
+          "Tamanho gigantesco: ~25 metros (GIGANTE)."
+        ],
+        drawSkeleton: function(ctx, x, y, isCorrect) {
+          const boneColor = isCorrect ? "#38BDF8" : "#EF4444";
+          ctx.strokeStyle = boneColor;
+          ctx.lineWidth = 4.5;
+          ctx.lineCap = "round";
+
+          // High Neck & Head
+          ctx.beginPath();
+          ctx.moveTo(x - 20, y - 10);
+          ctx.lineTo(x + 30, y - 85);
+          ctx.lineTo(x + 50, y - 85);
+          ctx.stroke();
+
+          // Body Spine
+          ctx.beginPath();
+          ctx.moveTo(x - 70, y + 10);
+          ctx.quadraticCurveTo(x - 40, y - 20, x - 20, y - 10);
+          ctx.stroke();
+
+          // 4 Pillars Legs
+          ctx.beginPath();
+          ctx.moveTo(x - 55, y); ctx.lineTo(x - 55, y + 42);
+          ctx.moveTo(x - 38, y); ctx.lineTo(x - 38, y + 42);
+          ctx.moveTo(x - 2, y - 5); ctx.lineTo(x - 2, y + 42);
+          ctx.moveTo(x + 15, y - 5); ctx.lineTo(x + 15, y + 42);
+          ctx.stroke();
+        }
+      }
+    ];
+
+    let currentFossilIndex = 0;
+    let isAnalyzed = false;
+    let isAssembled = false;
+    let assemblySuccess = false;
+    let score = 0;
+    let particles = [];
+
+    // HTML References
+    const canvas = document.getElementById('labCanvas');
+    const ctx = canvas.getContext('2d');
+    const notebookContent = document.getElementById('notebook-content');
+    const statusPill = document.getElementById('analysis-status-pill');
+    const scannerLine = document.getElementById('scanner-line');
+    const canvasToast = document.getElementById('canvas-toast');
+    const toastMsg = document.getElementById('toast-msg');
+    const toastIcon = document.getElementById('toast-icon');
+    const locationBanner = document.getElementById('location-banner');
+    const locationText = document.getElementById('location-text');
+
+    // Selectors
+    const selectDentes = document.getElementById('var-dentes');
+    const selectPostura = document.getElementById('var-postura');
+    const selectTamanho = document.getElementById('var-tamanho');
+    const selectEspecie = document.getElementById('var-especie');
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      drawLabScene();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawLabScene() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const targetDino = DINO_DATABASE[currentFossilIndex];
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Background
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, '#0F172A');
+      bgGrad.addColorStop(1, '#1E293B');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Tech Grid
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 30) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 30) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // X-Ray Table
+      const tableY = h * 0.72;
+      ctx.fillStyle = '#38A3F6';
+      ctx.fillRect(w * 0.15, tableY, w * 0.7, 12);
+      ctx.fillStyle = '#1E3A8A';
+      ctx.fillRect(w * 0.18, tableY + 12, w * 0.64, h - tableY);
+
+      // Pillars
+      ctx.fillStyle = '#64748B';
+      ctx.fillRect(w * 0.15 - 15, tableY - 120, 15, 132);
+      ctx.fillRect(w * 0.85, tableY - 120, 15, 132);
+
+      // Indicator LED
+      ctx.fillStyle = isAnalyzed ? '#10B981' : '#F59E0B';
+      ctx.beginPath(); ctx.arc(w * 0.15 - 7.5, tableY - 110, 5, 0, Math.PI * 2); ctx.fill();
+
+      const centerX = w / 2;
+      const centerY = tableY - 45;
+
+      // Draw Fossil State
+      if (!isAssembled) {
+        drawDisassembledBones(centerX, centerY, targetDino);
+      } else {
+        if (assemblySuccess) {
+          targetDino.drawSkeleton(ctx, centerX, centerY, true);
+
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+          ctx.beginPath(); ctx.arc(centerX, centerY - 20, 110, 0, Math.PI * 2); ctx.fill();
+
+          ctx.fillStyle = '#38BDF8';
+          ctx.font = 'bold 16px Nunito';
+          ctx.textAlign = 'center';
+          ctx.fillText(`✨ ESQUELETO DE ${targetDino.especie.toUpperCase()} MONTADO! ✨`, centerX, centerY - 110);
+        } else {
+          drawBrokenSkeleton(centerX, centerY);
+
+          ctx.fillStyle = '#EF4444';
+          ctx.font = 'bold 16px Nunito';
+          ctx.textAlign = 'center';
+          ctx.fillText('❌ ERRO NA MONTAGEM: PARÂMETROS INCORRETOS!', centerX, centerY - 110);
+        }
+      }
+
+      updateAndDrawParticles();
+    }
+
+    function drawDisassembledBones(x, y, dino) {
+      ctx.strokeStyle = isAnalyzed ? '#A0C4FF' : '#94A3B8';
+      ctx.lineWidth = 3;
+
+      const offsets = [
+        { dx: -60, dy: -20, r: 0.3 },
+        { dx: -20, dy: -35, r: -0.2 },
+        { dx: 30, dy: -10, r: 0.5 },
+        { dx: 60, dy: -30, r: -0.4 },
+        { dx: 0, dy: 10, r: 0.1 }
+      ];
+
+      offsets.forEach((off) => {
+        ctx.save();
+        ctx.translate(x + off.dx, y + off.dy);
+        ctx.rotate(off.r);
+        
+        ctx.beginPath();
+        ctx.moveTo(-15, 0); ctx.lineTo(15, 0);
+        ctx.arc(-15, -3, 4, 0, Math.PI * 2);
+        ctx.arc(-15, 3, 4, 0, Math.PI * 2);
+        ctx.arc(15, -3, 4, 0, Math.PI * 2);
+        ctx.arc(15, 3, 4, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      });
+
+      if (!isAnalyzed) {
+        ctx.fillStyle = '#F59E0B';
+        ctx.font = 'bold 28px Nunito';
+        ctx.textAlign = 'center';
+        ctx.fillText('?', x, y - 45);
+      }
+    }
+
+    function drawBrokenSkeleton(x, y) {
+      ctx.strokeStyle = '#EF4444';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(x - 40, y - 40); ctx.lineTo(x + 40, y + 20);
+      ctx.moveTo(x + 40, y - 40); ctx.lineTo(x - 40, y + 20);
+      ctx.stroke();
+
+      ctx.fillStyle = '#EF4444';
+      ctx.font = 'bold 36px Nunito';
+      ctx.textAlign = 'center';
+      ctx.fillText('❓', x, y - 50);
+    }
+
+    function createConfetti(x, y) {
+      const colors = ['#38BDF8', '#C7F9CC', '#FFEC99', '#FFC6FF', '#A0C4FF'];
+      for (let i = 0; i < 40; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.7) * 8,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          size: Math.random() * 6 + 3,
+          life: 1.0
+        });
+      }
+    }
+
+    function updateAndDrawParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.2;
+        p.life -= 0.02;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      toastMsg.textContent = message;
+      canvasToast.className = "absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-lg transition-all duration-300 opacity-100 translate-y-0 z-20 flex items-center gap-2 ";
+
+      if (type === 'success') {
+        canvasToast.classList.add('bg-emerald-500', 'text-white');
+        toastIcon.className = "fa-solid fa-circle-check";
+      } else if (type === 'error') {
+        canvasToast.classList.add('bg-rose-500', 'text-white');
+        toastIcon.className = "fa-solid fa-triangle-exclamation";
+      } else {
+        canvasToast.classList.add('bg-babyBlue-600', 'text-white');
+        toastIcon.className = "fa-solid fa-magnifying-glass";
+      }
+
+      setTimeout(() => {
+        canvasToast.classList.add('opacity-0', 'translate-y-4');
+        canvasToast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3500);
+    }
+
+    function analyzeFossil() {
+      if (isAnalyzed) {
+        showToast("Este fóssil já foi analisado! Confira o caderno.", "info");
+        return;
+      }
+
+      const dino = DINO_DATABASE[currentFossilIndex];
+      
+      scannerLine.classList.remove('hidden');
+      let scanCount = 0;
+      const scanInterval = setInterval(() => {
+        scanCount += 5;
+        scannerLine.style.top = `${(scanCount % 100)}%`;
+        if (scanCount > 200) {
+          clearInterval(scanInterval);
+          scannerLine.classList.add('hidden');
+          completeAnalysis(dino);
+        }
+      }, 30);
+    }
+
+    function completeAnalysis(dino) {
+      isAnalyzed = true;
+      statusPill.textContent = "Análise Concluída";
+      statusPill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300";
+
+      // Show location banner
+      locationBanner.classList.remove('hidden');
+      locationText.textContent = dino.mensagemDescoberta;
+
+      // Populate Notebook
+      notebookContent.innerHTML = `
+        <div class="font-extrabold text-babyBlue-600 text-base mb-1">
+          📌 Amostra #${currentFossilIndex + 1} (${dino.isAve ? 'Dinossauro Aviano / Ave' : 'Dinossauro Terrestre'}):
+        </div>
+        <ul class="space-y-1 text-slate-700 list-disc list-inside font-semibold">
+          ${dino.notasAnalise.map(note => `<li>${note}</li>`).join('')}
+        </ul>
+        <div class="mt-3 p-2 bg-amber-100/90 rounded-lg border border-amber-300 text-amber-900 text-sm font-bold">
+          👉 Configure no painel: <code class="bg-white px-1 rounded font-mono">dentes = "${dino.dentes}"</code>, <code class="bg-white px-1 rounded font-mono">postura = "${dino.postura}"</code>, <code class="bg-white px-1 rounded font-mono">tamanho = "${dino.tamanho}"</code>!
+        </div>
+      `;
+
+      showToast("Análise concluída! Origem geográfica e características reveladas.", "success");
+      drawLabScene();
+    }
+
+    function executeMontarEsqueleto() {
+      if (!isAnalyzed) {
+        showToast("Analise o fóssil com a Lupa antes de montar!", "error");
+        return;
+      }
+
+      const dino = DINO_DATABASE[currentFossilIndex];
+      const valDentes = selectDentes.value;
+      const valPostura = selectPostura.value;
+      const valTamanho = selectTamanho.value;
+      const valEspecie = selectEspecie.value;
+
+      const isDentesCorrect = valDentes === dino.dentes;
+      const isPosturaCorrect = valPostura === dino.postura;
+      const isTamanhoCorrect = valTamanho === dino.tamanho;
+      const isEspecieCorrect = valEspecie === dino.especie;
+
+      isAssembled = true;
+
+      if (isDentesCorrect && isPosturaCorrect && isTamanhoCorrect && isEspecieCorrect) {
+        assemblySuccess = true;
+        score = Math.min(6, score + 1);
+        updateScoreUI();
+        createConfetti(canvas.width / 2, canvas.height / 2);
+        showToast(`Sucesso! montar_esqueleto("${dino.especie}") reconstruiu o fóssil!`, "success");
+      } else {
+        assemblySuccess = false;
+        let errorReason = [];
+        if (!isDentesCorrect) errorReason.push("dentes");
+        if (!isPosturaCorrect) errorReason.push("postura");
+        if (!isTamanhoCorrect) errorReason.push("tamanho");
+        if (!isEspecieCorrect) errorReason.push("espécie");
+
+        showToast(`Erro na função! Variável(is) incorreta(s): ${errorReason.join(', ')}.`, "error");
+      }
+
+      drawLabScene();
+    }
+
+    function nextFossil() {
+      currentFossilIndex = (currentFossilIndex + 1) % DINO_DATABASE.length;
+      resetFossilState();
+    }
+
+    function resetFossilState() {
+      isAnalyzed = false;
+      isAssembled = false;
+      assemblySuccess = false;
+
+      selectDentes.value = "???";
+      selectPostura.value = "???";
+      selectTamanho.value = "???";
+      selectEspecie.value = "???";
+
+      locationBanner.classList.add('hidden');
+      statusPill.textContent = "Aguardando Lupa";
+      statusPill.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-300";
+      
+      notebookContent.innerHTML = `
+        <p class="text-slate-400 italic">
+          👈 Clique no botão <span class="font-bold text-amber-700 font-sans text-xs bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">1. Analisar Fóssil</span> para escanear a amostra e descobrir de qual país ele veio e quais são suas variáveis!
+        </p>
+      `;
+
+      document.getElementById('fossil-tag').textContent = `Amostra: #${String(currentFossilIndex + 1).padStart(3, '0')}`;
+      drawLabScene();
+    }
+
+    function updateScoreUI() {
+      document.getElementById('score-text').textContent = `${score} / ${DINO_DATABASE.length}`;
+      const badge = document.getElementById('level-badge');
+      if (score >= 6) {
+        badge.textContent = "Mestre Paleontólogo Dev 🏆";
+        badge.className = "text-xs font-extrabold text-purple-700 bg-purple-100 px-2 py-1 rounded-md border border-purple-300 block mt-0.5";
+      } else if (score >= 3) {
+        badge.textContent = "Cientista Pleno 🧬";
+        badge.className = "text-xs font-extrabold text-blue-700 bg-blue-100 px-2 py-1 rounded-md border border-blue-300 block mt-0.5";
+      }
+    }
+
+    function renderDatabaseGuide() {
+      const container = document.getElementById('db-content');
+      container.innerHTML = DINO_DATABASE.map(dino => `
+        <div class="bg-babyBlue-50/90 p-2.5 rounded-xl border border-babyBlue-200 text-xs flex items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-extrabold text-slate-800">${dino.especie}</span>
+              ${dino.isAve ? '<span class="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded text-[10px] font-bold">Ave 🪶</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-600 font-medium">📍 ${dino.pais}</div>
+            <div class="text-[10px] text-slate-500 font-mono mt-0.5">
+              dentes: <span class="text-babyBlue-600 font-bold">"${dino.dentes}"</span> | 
+              postura: <span class="text-babyBlue-600 font-bold">"${dino.postura}"</span>
+            </div>
+          </div>
+          <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${dino.cor}"></span>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('btn-analyze').addEventListener('click', analyzeFossil);
+    document.getElementById('btn-execute').addEventListener('click', executeMontarEsqueleto);
+    document.getElementById('btn-next').addEventListener('click', nextFossil);
+
+    const toggleDbBtn = document.getElementById('toggle-db-btn');
+    const dbContent = document.getElementById('db-content');
+    const dbChevron = document.getElementById('db-chevron');
+    toggleDbBtn.addEventListener('click', () => {
+      dbContent.classList.toggle('hidden');
+      dbChevron.classList.toggle('rotate-180');
+    });
+
+    function animateLoop() {
+      drawLabScene();
+      requestAnimationFrame(animateLoop);
+    }
+
+    window.onload = function() {
+      resizeCanvas();
+      renderDatabaseGuide();
+      animateLoop();
+    };
+  </script>
+</body>
+</html>
